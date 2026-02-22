@@ -182,11 +182,25 @@ MonoBehaviour:
   Acceleration: 20
   WalkSpeed: 3.5
   SprintSpeed: 8
+  JumpHeight: 2
+  canDoubleJump: 1
   LookSensitivity: {x: 0.1, y: 0.1}
   PitchLimit: 85
   currentPitch: 0
+  CameraNormalFOV: 60
+  CameraSprintFOV: 80
+  CameraFOVSmoothing: 1
+  GravityScale: 2
+  VerticalVelocity: 0
+  wasGrounded: 0
+  MoveInput: {x: 0, y: 0}
+  LookInput: {x: 0, y: 0}
+  SprintInput: 0
   _fpCamera: {fileID: 846320587735597220}
   _characterController: {fileID: 5428161036195510516}
+  Landed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &411306985870855354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,7 +213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df3ccdeb4a06809469e6a39344246227, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FPPlayer
-  FpController: {fileID: 2387993630451908182}
+  fpController: {fileID: 2387993630451908182}
 --- !u!1001 &8488196711846185449
 PrefabInstance:
   m_ObjectHideFlags: 0

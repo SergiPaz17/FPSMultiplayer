@@ -2,9 +2,11 @@ using System;
 using System.Numerics;
 using UnityEngine;
 using Unity.Cinemachine;
+using UnityEditor.Searcher;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
+using UnityEngine.Events;
 
 
 [RequireComponent(typeof(CharacterController))]
@@ -20,6 +22,10 @@ public class FPController : MonoBehaviour
     
     [Tooltip("This is how high the character can jump")]
     [SerializeField] float JumpHeight = 2f;
+
+    private int timesJumped = 0;
+
+    [SerializeField] private bool canDoubleJump = true;
 
 
     public bool Sprinting
@@ -70,8 +76,11 @@ public class FPController : MonoBehaviour
     
     public Vector3 CurrentVelocity { get; private set; }
     public float CurrentSpeed { get; private set; }
+
+    public bool wasGrounded = false;
     
     public bool IsGrounded => _characterController.isGrounded;
+    
 
     [Header("Inputs")] 
     public Vector2 MoveInput;
@@ -82,6 +91,11 @@ public class FPController : MonoBehaviour
     [Header("Components")]
     [SerializeField] CinemachineCamera _fpCamera;
     [SerializeField] private CharacterController _characterController;
+    
+    
+    [Header("Events")]
+    public UnityEvent Landed;
+    
 
     #region Unity Methods
     
@@ -99,6 +113,14 @@ public class FPController : MonoBehaviour
         MoveUpdate();
         LookUpdate();
         CameraUpdate();
+
+        if (!wasGrounded && IsGrounded)
+        {
+            timesJumped = 0;
+            Landed?.Invoke();   
+        }
+
+        wasGrounded = IsGrounded;
     }
 
     #endregion
@@ -109,9 +131,14 @@ public class FPController : MonoBehaviour
     {
         if (IsGrounded == false)
         {
-            return;
+            if (canDoubleJump && timesJumped < 2 && VerticalVelocity > 0.01f)
+            {
+                return;
+            }
         }
         VerticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Physics.gravity.y * GravityScale);
+
+        timesJumped++; 
     }
     
 
@@ -141,7 +168,15 @@ public class FPController : MonoBehaviour
         }
         
         Vector3 fullVelocity = new Vector3(CurrentVelocity.x, VerticalVelocity, CurrentVelocity.z);
-        
+
+        CollisionFlags flags = _characterController.Move(fullVelocity * Time.deltaTime);
+
+        if ((flags & CollisionFlags.Above ) != 0 && VerticalVelocity > 0.01f )
+        {
+            Debug.Log("Hit Something above!");
+            
+            VerticalVelocity = 0f;
+        }
         
         _characterController.Move(fullVelocity * Time.deltaTime);
         
